@@ -51,3 +51,18 @@ export const login = async (req, res) =>{
         res.status(500).json({error: "Login failed", details: error.message})   
     }
 }
+
+export const logout = async(req, res) =>{
+    try{
+        const token = req.headers.authorization.split(" ")[1]
+        if(!token) 
+            return res.status(401).json({error: "Unauthorized"})
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) =>{
+            if(err) 
+                return res.status(401).json({error: "Unathorized"})
+            return res.json({message: "logout successfully"})
+        })
+    }catch{
+        res.status(500).json({error: "Logout failed", details: error.message}) 
+    }
+}
