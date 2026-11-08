@@ -78,10 +78,23 @@ export const updateUser = async(req, res)=> {
         
         await User.updateOne(
             {email},
-            {skills: skills.length?skills: user.skills, role}
+            {skills: skills.length? skills: user.skills, role}
         )
         return res.json({message: "user updated successfully"})
     } catch (error) {
         return res.status(500).json({error: "update failed"})
+    }
+}
+
+export const getUsers = async(req, res)=>{
+    try {
+        if(req.user.role !== "admin"){
+            return res.status(403).json({error: "Forbidden"})
+        }
+
+        const users = await User.fine().select("-password")
+        return res.json(users)
+    } catch (error) {
+        return res.status(500).json({error: "Update failed", details: error.message})
     }
 }
