@@ -1,7 +1,7 @@
 import React from "react";
 
-function ticket() {
-    return <div>ticket</div>
+function Ticket() {
+    return <div>Ticket</div>
 }
 
-export default ticket;
+export default Ticket;

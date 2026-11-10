@@ -1,7 +1,7 @@
 import React from "react";
 
-function admin() {
-    return <div>admin</div>
+function Admin() {
+    return <div>Admin</div>
 }
 
-export default admin;
+export default Admin;
