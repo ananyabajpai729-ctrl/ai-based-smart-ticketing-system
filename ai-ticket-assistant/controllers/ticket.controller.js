@@ -29,33 +29,88 @@ export const createTicket = async(req, res)=>{
     }
 }
 
-
-export const getTickets = async(req, res)=>{
+export const getTickets = async (req, res) => {
     try {
-        const user = req.user
-        let tickets = []
+        const tickets = await Ticket.find({
+            createdBy: req.user._id
+        })
+        .sort({ createdAt: -1 });
 
-        if(user.role === "admin"){
-            tickets = await Ticket.find({})
-                .populate("assignedTo", ["email", "_id"])
-                .sort({createdAt: -1})
-        }else if(user.role === "moderator"){
-            tickets = await Ticket.find({assignedTo: user._id})
-                .populate("assignedTo", ["email", "_id"])
-                .sort({createdAt: -1})
-        }else{
-            tickets = await Ticket.find({createdBy: user._id})
-                .select("title description status createdAt createdBy")
-                .sort({createdAt: -1})
+        return res.status(200).json(tickets);
+
+    } catch (error) {
+        console.error("Error fetching tickets:", error.message);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+};
+
+export const getAssignedTickets = async (req, res) => {
+    try {
+        if (!["moderator", "admin"].includes(req.user.role)) {
+            return res.status(403).json({
+                message: "Access denied"
+            });
         }
 
-        return res.status(200).json(tickets)
-    } catch (error) {
-        console.error("Error fetching tickets", error.message)
-        return res.status(500).json({message: "Internal server error"})
-    }
-}
+        const tickets = await Ticket.find({
+            assignedTo: req.user._id
+        })
+        .populate("assignedTo", ["email", "_id"])
+        .sort({ createdAt: -1 });
 
+        return res.status(200).json(tickets);
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+};
+
+export const getMentoringTickets = async (req, res) => {
+    try {
+        const tickets = await Ticket.find({
+            mentor: req.user._id
+        })
+        .populate("createdBy", ["name", "email", "_id"])
+        .sort({ createdAt: -1 });
+
+        return res.status(200).json(tickets);
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+};
+
+export const getAllTickets = async (req, res) => {
+    try {
+        if (req.user.role !== "admin") {
+            return res.status(403).json({
+                message: "Access denied"
+            });
+        }
+
+        const tickets = await Ticket.find({})
+            .populate("createdBy", ["name", "email", "_id"])
+            .populate("assignedTo", ["email", "_id"])
+            .populate("mentor", ["name", "email", "_id"])
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json(tickets);
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+};
 
 
 export const getTicket = async(req, res)=>{
