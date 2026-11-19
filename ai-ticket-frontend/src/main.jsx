@@ -9,6 +9,10 @@ import Ticket from './pages/Ticket.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import Admin from './pages/Admin.jsx'
+import Profile from "./pages/Profile.jsx";
+import Mentors from "./pages/Mentor.jsx";
+import ReceivedRequests from "./pages/ReceivedRequests.jsx";
+import SentRequests from "./pages/SentRequests.jsx";
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
@@ -54,7 +58,38 @@ createRoot(document.getElementById('root')).render(
             </CheckAuth>
           }
         />
-
+        <Route
+          path="/profile"
+          element={
+            <CheckAuth protectedRoute={true}>
+              <Profile />
+            </CheckAuth>
+          }
+        />
+        <Route
+          path="/mentors"
+          element={
+            <CheckAuth protectedRoute={true}>
+              <Mentors />
+            </CheckAuth>
+          }
+        />
+        <Route
+          path="/requests/received"
+          element={
+            <CheckAuth protectedRoute={true}>
+              <ReceivedRequests />
+            </CheckAuth>
+          }
+        />
+        <Route
+          path="/requests/sent"
+          element={
+            <CheckAuth protectedRoute={true}>
+              <SentRequests />
+            </CheckAuth>
+          }
+        />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

@@ -11,6 +11,7 @@ import {serve} from "inngest/express"
 import {inngest} from "./inngest/client.js"
 import {onUserSignup} from "./inngest/functions/onsignup.js"
 import {onTicketCreated} from "./inngest/functions/onticketcreate.js"
+import connectionRequestRoutes from "./routes/connectionRequest.routes.js";
 
 import dotenv from "dotenv";
 dotenv.config()
@@ -28,6 +29,8 @@ app.use("/api/inngest", serve({
     client: inngest,
     functions: [onUserSignup, onTicketCreated]
 }))
+
+app.use("/api/requests", connectionRequestRoutes);
 
 mongoose
 .connect(process.env.MONGO_URI)

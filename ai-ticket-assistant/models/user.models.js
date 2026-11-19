@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
@@ -10,13 +11,35 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    role:{
+    role: {
         type: String,
         default: 'user',
         enum: ['user', 'admin', 'moderator']
     },
-    skills:[String],
-    createdAt:{
+
+    // Profile information
+    name: {
+        type: String,
+        default: ''
+    },
+    bio: {
+        type: String,
+        default: ''
+    },
+    skills: [String],
+    interests: [String],
+
+    // Participation preferences
+    canMentor: {
+        type: Boolean,
+        default: false
+    },
+    lookingForTeam: {
+        type: Boolean,
+        default: false
+    },
+
+    createdAt: {
         type: Date,
         default: Date.now
     }
