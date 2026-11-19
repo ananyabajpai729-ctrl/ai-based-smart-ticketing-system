@@ -15,7 +15,7 @@ const ticketSchema = new mongoose.Schema({
         enum: ['TODO', 'in-progress', 'closed']
     },
     createdBy:{
-        type: mongoose.Schema.types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
     priority: {
