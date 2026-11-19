@@ -28,14 +28,24 @@ export const createTicket = async(req, res)=>{
     }
 }
 
+
 export const getTickets = async(req, res)=>{
     try {
         const user = req.user
         let tickets = []
-        if(user.role !== "user"){
-            tickets = await Ticket.find({}).populate("assignedTo",["email", "_id"]).sort({createdAt: -1})
+
+        if(user.role === "admin"){
+            tickets = await Ticket.find({})
+                .populate("assignedTo", ["email", "_id"])
+                .sort({createdAt: -1})
+        }else if(user.role === "moderator"){
+            tickets = await Ticket.find({assignedTo: user._id})
+                .populate("assignedTo", ["email", "_id"])
+                .sort({createdAt: -1})
         }else{
-            tickets = await Ticket.find({createdBy: user._id}).select("title description status createdAt").sort({createdAt: -1})
+            tickets = await Ticket.find({createdBy: user._id})
+                .select("title description status createdAt")
+                .sort({createdAt: -1})
         }
 
         return res.status(200).json(tickets)
@@ -45,20 +55,33 @@ export const getTickets = async(req, res)=>{
     }
 }
 
+
+
 export const getTicket = async(req, res)=>{
     try {
         const user = req.user
         const id = req.params.id
         let ticket;
-        if(user.role !== "user"){
-            ticket = await Ticket.findById(id).populate("assignedTo", ["email", "_id"])
+
+        if(user.role === "admin"){
+            ticket = await Ticket.findById(id)
+                .populate("assignedTo", ["email", "_id"])
+        }else if(user.role === "moderator"){
+            ticket = await Ticket.findOne({
+                _id: id,
+                assignedTo: user._id
+            }).populate("assignedTo", ["email", "_id"])
         }else{
-            ticket = await Ticket.findOne({createdBy: user._id, _id: id}).select("title description status createdAt")
+            ticket = await Ticket.findOne({
+                createdBy: user._id,
+                _id: id
+            }).select("title description status createdAt")
         }
 
         if(!ticket){
-            return res.status(404).json({message : "ticket not found"})
+            return res.status(404).json({message: "ticket not found"})
         }
+
         return res.status(200).json(ticket)
     } catch (error) {
         console.error("Error fetching ticket", error.message)
