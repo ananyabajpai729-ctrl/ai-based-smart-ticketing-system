@@ -7,6 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import userRoutes from "./routes/user.routes.js"
 import ticketRoutes from "./routes/ticket.routes.js"
+import doubtMessageRoutes from "./routes/doubtMessage.routes.js";
 import {serve} from "inngest/express"
 import {inngest} from "./inngest/client.js"
 import {onUserSignup} from "./inngest/functions/onsignup.js"
@@ -31,6 +32,7 @@ app.use("/api/inngest", serve({
 }))
 
 app.use("/api/requests", connectionRequestRoutes);
+app.use("/api/discussions", doubtMessageRoutes);
 
 mongoose
 .connect(process.env.MONGO_URI)

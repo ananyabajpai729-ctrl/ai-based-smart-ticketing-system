@@ -8,7 +8,6 @@ export const sendConnectionRequest = async (req, res) => {
         const { mentorId, ticketId, message = "" } = req.body;
         const senderId = req.user._id;
 
-        // Check whether all required fields are provided
         if (!mentorId || !ticketId) {
             return res.status(400).json({
                 message: "Mentor and doubt are required"
@@ -16,7 +15,7 @@ export const sendConnectionRequest = async (req, res) => {
         }
 
         // A user cannot send a request to themselves
-        if (senderId === mentorId) {
+        if (senderId.toString() === mentorId.toString()) {
             return res.status(400).json({
                 message: "You cannot send a request to yourself"
             });
@@ -35,15 +34,17 @@ export const sendConnectionRequest = async (req, res) => {
             });
         }
 
-        // Check whether the doubt belongs to the logged-in student
+        // The doubt must belong to the sender and be available
         const ticket = await Ticket.findOne({
             _id: ticketId,
-            createdBy: senderId
+            createdBy: senderId,
+            status: { $ne: "closed" },
+            mentor: null
         });
 
         if (!ticket) {
             return res.status(404).json({
-                message: "Doubt not found"
+                message: "Doubt not found or no longer available for mentorship"
             });
         }
 
@@ -82,14 +83,15 @@ export const sendConnectionRequest = async (req, res) => {
     }
 };
 
+
 export const getReceivedRequests = async (req, res) => {
     try {
         const requests = await ConnectionRequest.find({
             mentor: req.user._id
         })
-        .populate("sender", "name email skills")
-        .populate("ticket", "title description status")
-        .sort({ createdAt: -1 });
+            .populate("sender", "name email skills")
+            .populate("ticket", "title description status")
+            .sort({ createdAt: -1 });
 
         return res.status(200).json(requests);
 
@@ -114,54 +116,75 @@ export const updateRequestStatus = async (req, res) => {
             });
         }
 
+        // Only the mentor who received this request can process it
         const request = await ConnectionRequest.findOne({
             _id: requestId,
-            mentor: req.user._id
+            mentor: req.user._id,
+            status: "pending"
         });
 
         if (!request) {
             return res.status(404).json({
-                message: "Connection request not found"
+                message: "Pending connection request not found"
             });
         }
 
-        if (request.status !== "pending") {
-            return res.status(400).json({
-                message: "This request has already been processed"
+        if (status === "rejected") {
+            request.status = "rejected";
+            await request.save();
+
+            return res.status(200).json({
+                message: "Request rejected successfully",
+                request
             });
         }
 
-        // If accepted, assign the doubt to this mentor
-        if (status === "accepted") {
+        // Atomically select the first mentor who accepts.
+        // Only one request can successfully claim a doubt.
+        const ticket = await Ticket.findOneAndUpdate(
+            {
+                _id: request.ticket,
+                createdBy: request.sender,
+                status: { $ne: "closed" },
+                mentor: null
+            },
+            {
+                $set: {
+                    mentor: request.mentor,
+                    status: "in-progress"
+                }
+            },
+            { new: true }
+        );
 
-            const ticket = await Ticket.findOneAndUpdate(
-                {
-                    _id: request.ticket,
-                    createdBy: request.sender,
-                    status: { $ne: "closed" }
-                },
-                {
-                    $set: {
-                        assignedTo: request.mentor,
-                        status: "in-progress"
-                    }
-                },
-                { new: true }
-            );
-
-            if (!ticket) {
-                return res.status(400).json({
-                    message: "The associated doubt was not found or is already closed"
-                });
-            }
+        if (!ticket) {
+            return res.status(409).json({
+                message: "This doubt is closed or another mentor has already been selected"
+            });
         }
 
-        request.status = status;
+        // Mark the winning request as accepted
+        request.status = "accepted";
         await request.save();
 
+        // Cancel all other pending requests for this doubt
+        await ConnectionRequest.updateMany(
+            {
+                _id: { $ne: request._id },
+                ticket: request.ticket,
+                status: "pending"
+            },
+            {
+                $set: {
+                    status: "cancelled"
+                }
+            }
+        );
+
         return res.status(200).json({
-            message: `Request ${status} successfully`,
-            request
+            message: "Request accepted successfully. Other pending requests have been cancelled.",
+            request,
+            ticket
         });
 
     } catch (error) {
@@ -179,9 +202,9 @@ export const getSentRequests = async (req, res) => {
         const requests = await ConnectionRequest.find({
             sender: req.user._id
         })
-        .populate("mentor", "name email skills")
-        .populate("ticket", "title description status")
-        .sort({ createdAt: -1 });
+            .populate("mentor", "name email skills")
+            .populate("ticket", "title description status")
+            .sort({ createdAt: -1 });
 
         return res.status(200).json(requests);
 
@@ -193,4 +216,3 @@ export const getSentRequests = async (req, res) => {
         });
     }
 };
-

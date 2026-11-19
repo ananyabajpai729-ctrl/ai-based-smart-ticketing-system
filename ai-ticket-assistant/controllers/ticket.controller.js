@@ -1,5 +1,6 @@
 import { inngest } from "../inngest/client.js";
 import Ticket from "../models/ticket.models.js"
+import ConnectionRequest from "../models/connectionRequest.models.js";
 
 export const createTicket = async(req, res)=>{
     try {
@@ -44,7 +45,7 @@ export const getTickets = async(req, res)=>{
                 .sort({createdAt: -1})
         }else{
             tickets = await Ticket.find({createdBy: user._id})
-                .select("title description status createdAt")
+                .select("title description status createdAt createdBy")
                 .sort({createdAt: -1})
         }
 
@@ -75,7 +76,7 @@ export const getTicket = async(req, res)=>{
             ticket = await Ticket.findOne({
                 createdBy: user._id,
                 _id: id
-            }).select("title description status createdAt")
+            }).select("title description status createdAt createdBy")
         }
 
         if(!ticket){
@@ -88,3 +89,70 @@ export const getTicket = async(req, res)=>{
         return res.status(500).json({message: "Internal server error"})
     }
 }
+
+export const resolveTicket = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Only the doubt creator can resolve it
+        const ticket = await Ticket.findOneAndUpdate(
+            {
+                _id: id,
+                createdBy: req.user._id,
+                status: { $ne: "closed" }
+            },
+            {
+                $set: { status: "closed" }
+            },
+            { new: true }
+        );
+
+        if (!ticket) {
+            const existingTicket = await Ticket.findById(id);
+
+            if (!existingTicket) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Doubt not found"
+                });
+            }
+
+            if (existingTicket.createdBy.toString() !== req.user._id.toString()) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Only the doubt creator can resolve it"
+                });
+            }
+
+            return res.status(400).json({
+                success: false,
+                message: "This doubt is already resolved"
+            });
+        }
+
+        // Cancel all remaining pending mentor requests
+        await ConnectionRequest.updateMany(
+            {
+                ticket: ticket._id,
+                status: "pending"
+            },
+            {
+                $set: { status: "cancelled" }
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Doubt resolved successfully",
+            ticket
+        });
+
+    } catch (error) {
+        console.error("Error resolving ticket:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};

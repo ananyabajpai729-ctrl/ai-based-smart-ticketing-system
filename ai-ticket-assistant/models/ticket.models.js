@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 
 const ticketSchema = new mongoose.Schema({
@@ -14,7 +15,7 @@ const ticketSchema = new mongoose.Schema({
         default: 'TODO',
         enum: ['TODO', 'in-progress', 'closed']
     },
-    createdBy:{
+    createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
@@ -26,10 +27,15 @@ const ticketSchema = new mongoose.Schema({
         ref: 'User',
         default: null
     },
-    deadline:{
+    mentor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    },
+    deadline: {
         type: Date,
     },
-    helpfulNotes:{
+    helpfulNotes: {
         type: String
     },
     relatedSkills: [String],
@@ -37,6 +43,6 @@ const ticketSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
-})
+});
 
 export default mongoose.model('Ticket', ticketSchema);
