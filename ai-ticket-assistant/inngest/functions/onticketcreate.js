@@ -1,12 +1,11 @@
-import {inngest} from "../client";
+import {inngest} from "../client.js";
 import User from "../../models/user.models.js"
 import { NonRetriableError } from "inngest";
-import { sendMail } from "../../utils/mailer.js";
+import { sendMail } from "../../utils/mailer.utils.js";
 import Ticket from "../../models/ticket.models.js"
 
 export const onTicketCreated = inngest.createFunction(
-    {id: "on-ticket-create", retries: 2},
-    {event: "ticket/created"},
+    {id: "on-ticket-create", retries: 2, triggers: {event: "ticket/created"}},
 
     async({event, step}) =>{
         try {
@@ -15,7 +14,7 @@ export const onTicketCreated = inngest.createFunction(
             const ticket = await step.run("fetch-ticket", async()=>{
                 const ticketObject = await Ticket.findById(ticketId)
                 if(!ticket)
-                    return newNonRetriableError("Ticket not found")
+                    return new NonRetriableError("Ticket not found")
 
                 return ticketObject
             })
@@ -26,14 +25,14 @@ export const onTicketCreated = inngest.createFunction(
                 })
             })
 
-            const aiResponse = await ananlyzeTicket(ticket)
+            const aiResponse = await analyzeTicket(ticket)
             const relatedSkills = await step.run("ai-processing", async() => {
                 let skills = []
                 if(aiResponse){
                     await Ticket.findByIdAndUpdate(ticket._id, {
                         priority: !["low", "medium", "high"].includes(aiResponse.priority)? "medium": aiResponse.priority,
                         helpfulNotes: aiResponse.helpfulNotes,
-                        status: "IN_PROGRESS",
+                        status: "in-progress",
                         relatedSkills: aiResponse.relatedSkills
                     })
                     skills = aiResponse.relatedSkills

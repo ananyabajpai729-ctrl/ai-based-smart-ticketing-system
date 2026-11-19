@@ -21,10 +21,11 @@ export default function TicketDetailsPage() {
           }
         );
         const data = await res.json();
+        setTicket(Array.isArray(data)? data: data.tickets || []);
         if (res.ok) {
-          setTicket(data.ticket);
+          setTicket(data.ticket || data);
         } else {
-          alert(data.message || "Failed to fetch ticket");
+          alert(data.message || data.error || "Failed to fetch ticket");
         }
       } catch (err) {
         console.error(err);

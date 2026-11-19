@@ -22,8 +22,9 @@ export default function AdminPanel(){
             });
             const data = await res.json();
             if (res.ok) {
-                setUsers(data);
-                setFilteredUsers(data);
+                const list = Array.isArray(data)? data: [];
+                setUsers(list);
+                setFilteredUsers(list);
             } else {
                 console.error(data.error);
             }
