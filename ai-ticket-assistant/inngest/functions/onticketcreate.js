@@ -36,7 +36,7 @@ export const onTicketCreated = inngest.createFunction(
                         status: "in-progress",
                         relatedSkills: aiResponse.relatedSkills
                     })
-                    skills = aiResponse.relatedSkills
+                    skills = Array.isArray(aiResponse.relatedSkills) ? aiResponse.relatedSkills : []
                 }
                 return skills
             })
