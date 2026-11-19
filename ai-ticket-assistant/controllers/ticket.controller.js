@@ -7,7 +7,7 @@ export const createTicket = async(req, res)=>{
         if(!title || !description){
             return res.status(400).json({error: "title and description are required"})
         }
-        const newTicket = Ticket.create({
+        const newTicket = await Ticket.create({
             title,
             description,
             createdBy: req.user._id.toString()
@@ -15,7 +15,7 @@ export const createTicket = async(req, res)=>{
         await inngest.send({
             name: "ticket/created",
             data: {
-                ticketId: (await newTicket)._id.toString(),
+                ticketId:  newTicket._id.toString(),
                 title,
                 description,
                 createdBy: req.user._id.toString()

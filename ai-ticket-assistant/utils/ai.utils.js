@@ -2,7 +2,7 @@ import {createAgent, gemini} from "@inngest/agent-kit"
 
 export const analyzeTicket = async (ticket) =>{
     const supportAgent = createAgent({
-        model: gemini.AiModel({
+        model: gemini({
             model: "gemini-3.8-flash",
             apiKey: process.env.GEMINI_API_KEY,
         }),

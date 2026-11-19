@@ -21,7 +21,7 @@ export default function TicketDetailsPage() {
           }
         );
         const data = await res.json();
-        setTicket(Array.isArray(data)? data: data.tickets || []);
+        
         if (res.ok) {
           setTicket(data.ticket || data);
         } else {

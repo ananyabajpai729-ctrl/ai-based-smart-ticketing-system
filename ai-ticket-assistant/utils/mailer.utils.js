@@ -13,7 +13,7 @@ export const sendMail = async(to, subject, text)=> {
         });
 
         const info = await transporter.sendMail({
-            from: "Inngest TMS",
+            from: process.env.MAIL_FROM,
             to,
             subject,
             text,

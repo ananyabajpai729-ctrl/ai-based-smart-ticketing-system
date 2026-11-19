@@ -3,6 +3,7 @@ import User from "../../models/user.models.js"
 import { NonRetriableError } from "inngest";
 import { sendMail } from "../../utils/mailer.utils.js";
 import Ticket from "../../models/ticket.models.js"
+import { analyzeTicket } from "../../utils/ai.utils.js";
 
 export const onTicketCreated = inngest.createFunction(
     {id: "on-ticket-create", retries: 2, triggers: {event: "ticket/created"}},
@@ -13,8 +14,8 @@ export const onTicketCreated = inngest.createFunction(
 
             const ticket = await step.run("fetch-ticket", async()=>{
                 const ticketObject = await Ticket.findById(ticketId)
-                if(!ticket)
-                    return new NonRetriableError("Ticket not found")
+                if(!ticketObject)
+                    throw new NonRetriableError("Ticket not found")
 
                 return ticketObject
             })
@@ -45,13 +46,13 @@ export const onTicketCreated = inngest.createFunction(
                     role: "moderator",
                     skills: {
                         $elemMatch:{
-                            $regex: relatedSkills.join("|"),
+                            $regex: relatedSkills.length?relatedSkills.join("|"):"^$",
                             $options: "i"
                         }
                     }
                 })
                 if(!user){
-                    await User.findOne({
+                    user = await User.findOne({
                         role: "admin"
                     })
                 }
