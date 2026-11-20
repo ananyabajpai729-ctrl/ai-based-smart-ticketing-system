@@ -81,24 +81,47 @@ export const logout = async(req, res) =>{
     }
 }
 
-export const updateUser = async(req, res)=> {
-    const{skills=[], email, role} = req.body;
+
+export const updateUser = async (req, res) => {
+    const { skills = [], email, role } = req.body;
+
     try {
-        if(req.user?.role !== "admin"){
-            return res.status(403).json({error: "forbidden"})
+        if (req.user?.role !== "admin") {
+            return res.status(403).json({ error: "Forbidden" });
         }
-        const user = await User.findOne(email);
-        if(!user) res.status(404).json({error:"user not found"})
-        
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found"
+            });
+        }
+
         await User.updateOne(
-            {email},
-            {skills: skills.length? skills: user.skills, role}
-        )
-        return res.json({message: "user updated successfully"})
+            { email },
+            {
+                $set: {
+                    skills,
+                    role
+                }
+            },
+            { runValidators: true }
+        );
+
+        return res.status(200).json({
+            message: "User updated successfully"
+        });
+
     } catch (error) {
-        return res.status(500).json({error: "update failed"})
+        console.error("Error updating user:", error);
+
+        return res.status(500).json({
+            error: "Update failed"
+        });
     }
-}
+};
+
 
 export const getUsers = async(req, res)=>{
     try {

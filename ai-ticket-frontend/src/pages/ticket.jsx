@@ -139,11 +139,11 @@ export default function TicketDetailsPage() {
     return <div className="text-center mt-10">Ticket not found</div>;
 
   return (
-    <div className="max-w-3xl mx-auto p-4 space-y-6 text-white">
+    <div className="max-w-3xl mx-auto p-4 space-y-6 ">
       <h2 className="text-2xl font-bold">Ticket Details</h2>
 
       {/* Original doubt details */}
-      <div className="card bg-gray-800 shadow p-4 space-y-4">
+      <div className="card bg-green-400 shadow p-4 space-y-4">
         <h3 className="text-xl font-semibold">{ticket.title}</h3>
         <p>{ticket.description}</p>
 
@@ -154,13 +154,14 @@ export default function TicketDetailsPage() {
             <p>
               <strong>Status:</strong> {ticket.status}
             </p>
-            {user?._id === ticket.createdBy && ticket.status !== "closed" && (
-              <button
-                onClick={handleResolve}
-                className="btn btn-success"
-              >
-                Mark as Resolved
-              </button>
+            {user?._id === (ticket.createdBy?._id || ticket.createdBy) &&
+              ticket.status !== "closed" && (
+                <button
+                  onClick={handleResolve}
+                  className="btn btn-success"
+                >
+                  Mark as Resolved
+                </button>
             )}
 
             {ticket.priority && (
