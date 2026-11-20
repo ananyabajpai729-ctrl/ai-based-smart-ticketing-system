@@ -13,6 +13,9 @@ import Profile from "./pages/Profile.jsx";
 import Mentors from "./pages/Mentor.jsx";
 import ReceivedRequests from "./pages/ReceivedRequests.jsx";
 import SentRequests from "./pages/SentRequests.jsx";
+import AssignedTickets from "./pages/AssignedTickets.jsx";
+import MentoringTickets from "./pages/MentoringTickets.jsx";
+import AllTickets from "./pages/AllTickets.jsx";
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
@@ -87,6 +90,32 @@ createRoot(document.getElementById('root')).render(
           element={
             <CheckAuth protectedRoute={true}>
               <SentRequests />
+            </CheckAuth>
+          }
+        />
+        <Route
+          path="/assigned"
+          element={
+            <CheckAuth protectedRoute={true}>
+              <AssignedTickets />
+            </CheckAuth>
+          }
+        />
+
+        <Route
+          path="/mentoring"
+          element={
+            <CheckAuth protectedRoute={true}>
+              <MentoringTickets />
+            </CheckAuth>
+          }
+        />
+
+        <Route
+          path="/all-doubts"
+          element={
+            <CheckAuth protectedRoute={true}>
+              <AllTickets />
             </CheckAuth>
           }
         />

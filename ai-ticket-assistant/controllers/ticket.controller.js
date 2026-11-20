@@ -113,37 +113,51 @@ export const getAllTickets = async (req, res) => {
 };
 
 
-export const getTicket = async(req, res)=>{
+
+export const getTicket = async (req, res) => {
     try {
-        const user = req.user
-        const id = req.params.id
+        const user = req.user;
+        const id = req.params.id;
+
         let ticket;
 
-        if(user.role === "admin"){
+        if (user.role === "admin") {
             ticket = await Ticket.findById(id)
                 .populate("assignedTo", ["email", "_id"])
-        }else if(user.role === "moderator"){
+                .populate("mentor", ["name", "email", "_id"])
+                .populate("createdBy", ["name", "email", "_id"]);
+
+        } else {
             ticket = await Ticket.findOne({
                 _id: id,
-                assignedTo: user._id
-            }).populate("assignedTo", ["email", "_id"])
-        }else{
-            ticket = await Ticket.findOne({
-                createdBy: user._id,
-                _id: id
-            }).select("title description status createdAt createdBy")
+                $or: [
+                    { createdBy: user._id },
+                    { assignedTo: user._id },
+                    { mentor: user._id }
+                ]
+            })
+                .populate("assignedTo", ["email", "_id"])
+                .populate("mentor", ["name", "email", "_id"])
+                .populate("createdBy", ["name", "email", "_id"]);
         }
 
-        if(!ticket){
-            return res.status(404).json({message: "ticket not found"})
+        if (!ticket) {
+            return res.status(404).json({
+                message: "Ticket not found"
+            });
         }
 
-        return res.status(200).json(ticket)
+        return res.status(200).json(ticket);
+
     } catch (error) {
-        console.error("Error fetching ticket", error.message)
-        return res.status(500).json({message: "Internal server error"})
+        console.error("Error fetching ticket:", error.message);
+
+        return res.status(500).json({
+            message: "Internal server error"
+        });
     }
-}
+};
+
 
 export const resolveTicket = async (req, res) => {
     try {
