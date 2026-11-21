@@ -11,6 +11,8 @@ import Signup from './pages/Signup.jsx'
 import Admin from './pages/Admin.jsx'
 import Profile from "./pages/Profile.jsx";
 import Mentors from "./pages/Mentor.jsx";
+import CreateProject from "./pages/CreateProject.jsx";
+import MyProjects from "./pages/MyProjects.jsx";
 import ReceivedRequests from "./pages/ReceivedRequests.jsx";
 import SentRequests from "./pages/SentRequests.jsx";
 import AssignedTickets from "./pages/AssignedTickets.jsx";
@@ -118,6 +120,23 @@ createRoot(document.getElementById('root')).render(
               <AllTickets />
             </CheckAuth>
           }
+        />
+        <Route
+            path="/projects/create"
+            element={
+                <CheckAuth protectedRoute={true}>
+                    <CreateProject />
+                </CheckAuth>
+            }
+        />
+
+        <Route
+            path="/my-projects"
+            element={
+                <CheckAuth protectedRoute={true}>
+                    <MyProjects />
+                </CheckAuth>
+            }
         />
       </Routes>
     </BrowserRouter>

@@ -48,6 +48,7 @@ export default function Navbar() {
 
           {/* Desktop navigation */}
           {token && (
+
             <div className="hidden lg:flex items-center gap-1">
               <Link to="/" className={navLinkClass("/")}>
                 My Doubts
@@ -113,6 +114,9 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                <Link to="/my-projects" className={navLinkClass("/my-projects")}>
+                    My Projects
+                </Link>
                 <Link
                   to="/profile"
                   className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${

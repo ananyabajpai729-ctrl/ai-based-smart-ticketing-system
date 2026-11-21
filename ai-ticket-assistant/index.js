@@ -7,6 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import userRoutes from "./routes/user.routes.js"
 import ticketRoutes from "./routes/ticket.routes.js"
+import projectRoutes from "./routes/project.routes.js";
 import doubtMessageRoutes from "./routes/doubtMessage.routes.js";
 import {serve} from "inngest/express"
 import {inngest} from "./inngest/client.js"
@@ -26,6 +27,9 @@ app.use(express.json())
 
 app.use("/api/auth", userRoutes)
 app.use("/api/tickets", ticketRoutes)
+app.use("/api/projects", projectRoutes);
+
+
 app.use("/api/inngest", serve({
     client: inngest,
     functions: [onUserSignup, onTicketCreated]
