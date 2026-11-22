@@ -8,6 +8,7 @@ export default function MyProjects() {
 
     const BASE_URL = import.meta.env.VITE_SERVER_URL;
     const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || "null");
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -66,55 +67,74 @@ export default function MyProjects() {
                 </div>
             ) : (
                 <div className="grid md:grid-cols-2 gap-5">
-                    {projects.map(project => (
-                        <div
-                            key={project._id}
-                            className="card bg-base-200 shadow-md"
-                        >
-                            <div className="card-body">
+                    {projects.map(project => {
+                        const isCreator =
+                            project.createdBy?._id === user?._id;
 
-                                <h3 className="card-title">
-                                    {project.title}
-                                </h3>
+                        return (
+                            <div
+                                key={project._id}
+                                className="card bg-base-200 shadow-md"
+                            >
+                                <div className="card-body">
 
-                                <p>{project.description}</p>
+                                    <h3 className="card-title">
+                                        {project.title}
+                                    </h3>
 
-                                <div>
-                                    <strong>Required Skills:</strong>
+                                    <p>{project.description}</p>
 
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        {project.requiredSkills.map(
-                                            (skill, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="badge badge-outline"
-                                                >
-                                                    {skill}
-                                                </span>
-                                            )
+                                    <div>
+                                        <strong>Required Skills:</strong>
+
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {project.requiredSkills.map(
+                                                (skill, index) => (
+                                                    <span
+                                                        key={index}
+                                                        className="badge badge-outline"
+                                                    >
+                                                        {skill}
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <p className="text-sm text-gray-500">
+                                        Created by: {
+                                            project.createdBy?.name || "Unknown"
+                                        }
+                                    </p>
+
+                                    <p className="text-sm">
+                                        Team Members: {project.members.length}
+                                    </p>
+
+                                    <div className="card-actions justify-between items-center">
+                                        <span className="badge badge-primary">
+                                            {project.status}
+                                        </span>
+                                        <Link
+                                            to={`/projects/${project._id}`}
+                                            className="btn btn-outline btn-sm"
+                                        >
+                                            View Project
+                                        </Link>
+                                        {isCreator && project.status === "recruiting" && (
+                                            <Link
+                                                to={`/projects/${project._id}/candidates`}
+                                                className="btn btn-sm btn-primary"
+                                            >
+                                                Find Teammates
+                                            </Link>
                                         )}
                                     </div>
+
                                 </div>
-
-                                <p className="text-sm text-gray-500">
-                                    Created by: {
-                                        project.createdBy?.name || "Unknown"
-                                    }
-                                </p>
-
-                                <p className="text-sm">
-                                    Team Members: {project.members.length}
-                                </p>
-
-                                <div className="card-actions justify-end">
-                                    <span className="badge badge-primary">
-                                        {project.status}
-                                    </span>
-                                </div>
-
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>

@@ -118,6 +118,18 @@ export default function Navbar() {
                     My Projects
                 </Link>
                 <Link
+                    to="/project-invitations"
+                    className={navLinkClass("/project-invitations")}
+                >
+                    Project Invitations
+                </Link>
+                <Link
+                    to="/sent-project-invitations"
+                    className={navLinkClass("/sent-project-invitations")}
+                >
+                    Sent Invitations
+                </Link>
+                <Link
                   to="/profile"
                   className={`hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
                     location.pathname === "/profile"
